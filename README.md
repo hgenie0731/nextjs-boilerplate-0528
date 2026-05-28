@@ -57,6 +57,17 @@ Add the same environment variables in Vercel:
 - `NEXTAUTH_URL`
 - `DATABASE_URL` with your Neon direct connection string
 
+If you already have the older env names locally, they still work:
+
+- `AUTH_GOOGLE_ID` as an alias for `GOOGLE_CLIENT_ID`
+- `AUTH_GOOGLE_SECRET` as an alias for `GOOGLE_CLIENT_SECRET`
+- `AUTH_SECRET` as an alias for `NEXTAUTH_SECRET`
+
+Google OAuth must also allow these redirect URIs:
+
+- `http://localhost:3000/api/auth/callback/google`
+- `https://<your-vercel-deployment-domain>/api/auth/callback/google`
+
 ## Authentication Flow
 
 - Home page shows a Google sign-in button

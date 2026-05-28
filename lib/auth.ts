@@ -15,6 +15,14 @@ function getNextAuthSecret() {
   return process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || ''
 }
 
+function getGoogleClientId() {
+  return process.env.GOOGLE_CLIENT_ID || process.env.AUTH_GOOGLE_ID || ''
+}
+
+function getGoogleClientSecret() {
+  return process.env.GOOGLE_CLIENT_SECRET || process.env.AUTH_GOOGLE_SECRET || ''
+}
+
 export function setNextAuthBaseUrl() {
   const baseUrl = getBaseUrl()
 
@@ -27,8 +35,8 @@ export function setNextAuthBaseUrl() {
 
 export function getMissingAuthConfig() {
   return [
-    !process.env.GOOGLE_CLIENT_ID && 'GOOGLE_CLIENT_ID',
-    !process.env.GOOGLE_CLIENT_SECRET && 'GOOGLE_CLIENT_SECRET',
+    !getGoogleClientId() && 'GOOGLE_CLIENT_ID (or AUTH_GOOGLE_ID)',
+    !getGoogleClientSecret() && 'GOOGLE_CLIENT_SECRET (or AUTH_GOOGLE_SECRET)',
     !getNextAuthSecret() && 'NEXTAUTH_SECRET (or AUTH_SECRET)',
   ].filter(Boolean) as string[]
 }
@@ -36,8 +44,8 @@ export function getMissingAuthConfig() {
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+      clientId: getGoogleClientId(),
+      clientSecret: getGoogleClientSecret(),
     }),
   ],
   session: {
