@@ -1,6 +1,6 @@
 # Next.js Boilerplate
 
-Next.js 14, Tailwind CSS, shadcn/ui, Google OAuth, and Prisma for MongoDB.
+Next.js 14, Tailwind CSS, shadcn/ui, Google OAuth, and Prisma for Neon/Postgres.
 
 ## Tech Stack
 
@@ -9,7 +9,7 @@ Next.js 14, Tailwind CSS, shadcn/ui, Google OAuth, and Prisma for MongoDB.
 - TypeScript
 - Tailwind CSS + shadcn/ui
 - NextAuth.js with Google OAuth
-- Prisma + MongoDB
+- Prisma + PostgreSQL (Neon direct connection)
 
 ## Quick Start
 
@@ -29,11 +29,11 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 NEXTAUTH_SECRET=your-nextauth-secret
 NEXTAUTH_URL=http://localhost:3000
 
-# Optional if you want to persist users in MongoDB
-DATABASE_URL=mongodb+srv://username:password@cluster.mongodb.net/database
+# Neon PostgreSQL direct connection string
+DATABASE_URL=postgresql://username:password@ep-example.neon.tech/neondb?sslmode=require
 ```
 
-3. Push Prisma schema if using MongoDB sync
+3. Push Prisma schema to Postgres
 
 ```bash
 npx prisma db push
@@ -55,7 +55,7 @@ Add the same environment variables in Vercel:
 - `GOOGLE_CLIENT_SECRET`
 - `NEXTAUTH_SECRET`
 - `NEXTAUTH_URL`
-- `DATABASE_URL` if you want user sync
+- `DATABASE_URL` with your Neon direct connection string
 
 ## Authentication Flow
 

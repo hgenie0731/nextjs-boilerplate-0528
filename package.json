@@ -1,7 +1,7 @@
 {
   "name": "nextjs-boilerplate",
   "version": "1.0.0",
-  "description": "Next.js boilerplate with Tailwind, shadcn, Google OAuth, and MongoDB",
+  "description": "Next.js boilerplate with Tailwind, shadcn, Google OAuth, and Neon/Postgres",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
