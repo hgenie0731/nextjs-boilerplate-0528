@@ -3,14 +3,14 @@ export interface User {
   email: string
   name?: string | null
   picture?: string | null
-  auth0Id: string
+  oauthId: string
   createdAt: Date
   updatedAt: Date
 }
 
 export interface SessionUser {
-  sub: string
+  id: string
   email: string
-  name?: string
-  picture?: string
+  name?: string | null
+  picture?: string | null
 }

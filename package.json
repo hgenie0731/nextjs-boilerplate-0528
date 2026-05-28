@@ -1,7 +1,7 @@
 {
   "name": "nextjs-boilerplate",
   "version": "1.0.0",
-  "description": "Next.js boilerplate with Tailwind, shadcn, Auth0, and MongoDB",
+  "description": "Next.js boilerplate with Tailwind, shadcn, Google OAuth, and MongoDB",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -12,13 +12,13 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
-    "@auth0/nextjs-auth0": "^3.0.0",
     "@prisma/client": "^5.0.0",
     "@radix-ui/react-slot": "^1.2.4",
     "autoprefixer": "^10.4.16",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "next": "^14.0.0",
+    "next-auth": "^4.24.14",
     "postcss": "^8.4.31",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

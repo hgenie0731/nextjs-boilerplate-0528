@@ -1,24 +1,105 @@
-import { getSession } from '@auth0/nextjs-auth0'
-import { SessionUser } from './types'
+import { getServerSession } from 'next-auth/next'
+import type { NextAuthOptions } from 'next-auth'
+import GoogleProvider from 'next-auth/providers/google'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
-export async function getSessionUser(): Promise<SessionUser | null> {
-  const session = await getSession()
-  if (!session || !session.user) {
+function getBaseUrl() {
+  return (
+    process.env.NEXTAUTH_URL ||
+    process.env.APP_BASE_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+  )
+}
+
+function getNextAuthSecret() {
+  return process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || ''
+}
+
+export function setNextAuthBaseUrl() {
+  const baseUrl = getBaseUrl()
+
+  if (baseUrl && !process.env.NEXTAUTH_URL) {
+    process.env.NEXTAUTH_URL = baseUrl
+  }
+
+  return baseUrl
+}
+
+export function getMissingAuthConfig() {
+  return [
+    !process.env.GOOGLE_CLIENT_ID && 'GOOGLE_CLIENT_ID',
+    !process.env.GOOGLE_CLIENT_SECRET && 'GOOGLE_CLIENT_SECRET',
+    !getNextAuthSecret() && 'NEXTAUTH_SECRET (or AUTH_SECRET)',
+  ].filter(Boolean) as string[]
+}
+
+export const authOptions: NextAuthOptions = {
+  providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+    }),
+  ],
+  session: {
+    strategy: 'jwt',
+  },
+  secret: getNextAuthSecret(),
+  callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider !== 'google') {
+        return true
+      }
+
+      if (!process.env.DATABASE_URL) {
+        return true
+      }
+
+      const { prisma } = await import('@/lib/db')
+
+      const googleId =
+        (profile as { sub?: string } | undefined)?.sub ||
+        account.providerAccountId ||
+        user.email ||
+        user.name
+
+      if (!googleId || !user.email) {
+        return true
+      }
+
+      await prisma.user.upsert({
+        where: { oauthId: googleId },
+        update: {
+          email: user.email,
+          name: user.name,
+          picture: user.image,
+        },
+        create: {
+          oauthId: googleId,
+          email: user.email,
+          name: user.name,
+          picture: user.image,
+        },
+      })
+
+      return true
+    },
+  },
+}
+
+export async function getSessionUser(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  const session = await getServerSession(req, res, authOptions)
+
+  if (!session?.user) {
     return null
   }
 
   return {
-    sub: session.user.sub,
+    id: session.user.email || session.user.name || '',
     email: session.user.email || '',
     name: session.user.name,
-    picture: session.user.picture,
+    picture: session.user.image,
   }
-}
-
-export function getAuth0LoginUrl(): string {
-  return `${process.env.APP_BASE_URL || process.env.AUTH0_BASE_URL || ''}/api/auth/login`
-}
-
-export function getAuth0LogoutUrl(): string {
-  return `${process.env.APP_BASE_URL || process.env.AUTH0_BASE_URL || ''}/api/auth/logout`
 }

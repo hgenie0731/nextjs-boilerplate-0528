@@ -1,26 +1,18 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
-import Link from 'next/link'
+import { signIn, useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 
 export default function Home() {
   const router = useRouter()
+  const { status } = useSession()
 
   useEffect(() => {
-    async function checkAuth() {
-      try {
-        const response = await fetch('/api/user')
-        if (response.ok) {
-          router.push('/dashboard')
-        }
-      } catch (error) {
-        // User not authenticated, stay on login page
-      }
+    if (status === 'authenticated') {
+      router.push('/dashboard')
     }
-
-    checkAuth()
-  }, [router])
+  }, [router, status])
 
   return (
     <div className="flex items-center justify-center min-h-screen">
@@ -32,9 +24,9 @@ export default function Home() {
           <p className="text-muted-foreground mb-6">
             Sign in to your account using Google
           </p>
-          <Link href="/api/auth/login">
-            <Button className="w-full">Sign in with Google</Button>
-          </Link>
+          <Button className="w-full" onClick={() => signIn('google')}>
+            Sign in with Google
+          </Button>
         </CardContent>
       </Card>
     </div>

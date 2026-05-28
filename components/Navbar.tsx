@@ -1,42 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
+import { signIn, signOut, useSession } from 'next-auth/react'
 import { Button } from './ui/button'
 
-interface User {
-  email: string
-  name?: string
-}
-
 export default function Navbar() {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-  const router = useRouter()
-
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const response = await fetch('/api/user')
-        if (response.ok) {
-          const data = await response.json()
-          setUser(data)
-        }
-      } catch (error) {
-        console.error('Failed to fetch user:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchUser()
-  }, [])
-
-  const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'GET' })
-    router.push('/')
-  }
+  const { data: session, status } = useSession()
+  const user = session?.user
+  const loading = status === 'loading'
 
   return (
     <nav className="border-b border-border bg-card">
@@ -48,20 +19,20 @@ export default function Navbar() {
           {!loading && user ? (
             <>
               <span className="text-sm text-muted-foreground">
-                {user.name || user.email}
+                {user.name || user.email || 'Signed in'}
               </span>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleLogout}
+                onClick={() => signOut({ callbackUrl: '/' })}
               >
                 Logout
               </Button>
             </>
           ) : (
-            <Link href="/api/auth/login">
-              <Button size="sm">Login</Button>
-            </Link>
+            <Button size="sm" onClick={() => signIn('google')}>
+              Login
+            </Button>
           )}
         </div>
       </div>
