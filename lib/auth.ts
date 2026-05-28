@@ -3,10 +3,30 @@ import type { NextAuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-function getBaseUrl() {
+function getRequestBaseUrl(req?: NextApiRequest) {
+  const forwardedHost = req?.headers['x-forwarded-host']
+  const hostHeader = req?.headers.host
+  const host = Array.isArray(forwardedHost)
+    ? forwardedHost[0]
+    : forwardedHost || hostHeader
+
+  if (host) {
+    const forwardedProto = req?.headers['x-forwarded-proto']
+    const proto = Array.isArray(forwardedProto)
+      ? forwardedProto[0]
+      : forwardedProto || (host.includes('localhost') ? 'http' : 'https')
+
+    return `${proto}://${host}`
+  }
+
+  return null
+}
+
+function getBaseUrl(req?: NextApiRequest) {
   return (
-    process.env.NEXTAUTH_URL ||
+    getRequestBaseUrl(req) ||
     process.env.APP_BASE_URL ||
+    process.env.NEXTAUTH_URL ||
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
   )
 }
@@ -23,10 +43,10 @@ function getGoogleClientSecret() {
   return process.env.GOOGLE_CLIENT_SECRET || process.env.AUTH_GOOGLE_SECRET || ''
 }
 
-export function setNextAuthBaseUrl() {
-  const baseUrl = getBaseUrl()
+export function setNextAuthBaseUrl(req?: NextApiRequest) {
+  const baseUrl = getBaseUrl(req)
 
-  if (baseUrl && !process.env.NEXTAUTH_URL) {
+  if (baseUrl && process.env.NEXTAUTH_URL !== baseUrl) {
     process.env.NEXTAUTH_URL = baseUrl
   }
 
@@ -140,6 +160,8 @@ export async function getSessionUser(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  setNextAuthBaseUrl(req)
+
   const session = await getServerSession(req, res, authOptions)
 
   if (!session?.user) {
