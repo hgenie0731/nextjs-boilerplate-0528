@@ -2,6 +2,29 @@ import { handleAuth, handleLogin, handleCallback } from '@auth0/nextjs-auth0'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/db'
 
+// Support both the current Auth0 env names and the legacy names used in the docs.
+// This keeps deployed environments working while we migrate configuration.
+const auth0Domain =
+  process.env.AUTH0_DOMAIN ||
+  process.env.AUTH0_ISSUER_BASE_URL?.replace(/^https?:\/\//, '')
+
+const appBaseUrl =
+  process.env.APP_BASE_URL ||
+  process.env.AUTH0_BASE_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined)
+
+if (auth0Domain && !process.env.AUTH0_DOMAIN) {
+  process.env.AUTH0_DOMAIN = auth0Domain
+}
+
+if (appBaseUrl && !process.env.APP_BASE_URL) {
+  process.env.APP_BASE_URL = appBaseUrl
+}
+
+if (appBaseUrl && !process.env.AUTH0_BASE_URL) {
+  process.env.AUTH0_BASE_URL = appBaseUrl
+}
+
 const afterCallback = async (session: any, _state: any) => {
   try {
     // Create or update user in database

@@ -19,8 +19,8 @@ Tailwind CSS, shadcn/ui, Auth0 (Google login), MongoDB가 통합된 Next.js 보�
 ```bash
 # Auth0
 AUTH0_SECRET=your-secret-here
-AUTH0_BASE_URL=http://localhost:3000
-AUTH0_ISSUER_BASE_URL=https://your-domain.auth0.com
+AUTH0_DOMAIN=your-domain.auth0.com
+APP_BASE_URL=http://localhost:3000
 AUTH0_CLIENT_ID=your-client-id
 AUTH0_CLIENT_SECRET=your-client-secret
 
@@ -126,7 +126,7 @@ npx prisma studio    # 데이터베이스 시각화
 
 생성한 애플리케이션에서 다음 정보를 복사합니다:
 
-- **Domain:** `AUTH0_ISSUER_BASE_URL`
+- **Domain:** `AUTH0_DOMAIN`
 - **Client ID:** `AUTH0_CLIENT_ID`
 - **Client Secret:** `AUTH0_CLIENT_SECRET`
 - **Secret:** `AUTH0_SECRET` (무작위 문자열 생성)
