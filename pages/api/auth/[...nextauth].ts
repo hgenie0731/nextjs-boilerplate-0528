@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { authOptions, getMissingAuthConfig, setNextAuthBaseUrl } from '@/lib/auth'
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  setNextAuthBaseUrl(req)
+  setNextAuthBaseUrl()
 
   const missingConfig = getMissingAuthConfig()
 
