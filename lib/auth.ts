@@ -91,6 +91,48 @@ export const authOptions: NextAuthOptions = {
 
       return true
     },
+    async jwt({ token, user }) {
+      const tokenWithUserId = token as typeof token & {
+        userId?: string
+        email?: string | null
+      }
+
+      if (user?.email && process.env.DATABASE_URL) {
+        const { prisma } = await import('@/lib/db')
+        const dbUser = await prisma.user.findUnique({
+          where: { email: user.email },
+          select: { id: true },
+        })
+        tokenWithUserId.userId =
+          dbUser?.id || tokenWithUserId.userId || user.email
+        return tokenWithUserId
+      }
+
+      if (!tokenWithUserId.userId && tokenWithUserId.email && process.env.DATABASE_URL) {
+        const { prisma } = await import('@/lib/db')
+        const dbUser = await prisma.user.findUnique({
+          where: { email: tokenWithUserId.email },
+          select: { id: true },
+        })
+        tokenWithUserId.userId = dbUser?.id || tokenWithUserId.email
+      }
+
+      return tokenWithUserId
+    },
+    async session({ session, token }) {
+      const sessionWithId = session as typeof session & {
+        user: typeof session.user & { id?: string }
+      }
+      const tokenWithUserId = token as typeof token & { userId?: string }
+
+      if (sessionWithId.user) {
+        sessionWithId.user.id = String(
+          tokenWithUserId.userId || session.user?.email || ''
+        )
+      }
+
+      return sessionWithId
+    },
   },
 }
 
@@ -104,10 +146,17 @@ export async function getSessionUser(
     return null
   }
 
+  const sessionUser = session.user as {
+    id?: string
+    email?: string | null
+    name?: string | null
+    image?: string | null
+  }
+
   return {
-    id: session.user.email || session.user.name || '',
-    email: session.user.email || '',
-    name: session.user.name,
-    picture: session.user.image,
+    id: sessionUser.id || sessionUser.email || sessionUser.name || '',
+    email: sessionUser.email || '',
+    name: sessionUser.name || undefined,
+    picture: sessionUser.image || undefined,
   }
 }
