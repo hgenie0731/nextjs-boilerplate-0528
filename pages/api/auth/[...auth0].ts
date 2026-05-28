@@ -1,6 +1,5 @@
 import { handleAuth, handleLogin, handleCallback } from '@auth0/nextjs-auth0'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { prisma } from '@/lib/db'
 
 // Support both the current Auth0 env names and the legacy names used in the docs.
 // This keeps deployed environments working while we migrate configuration.
@@ -27,22 +26,27 @@ if (appBaseUrl && !process.env.AUTH0_BASE_URL) {
 
 const afterCallback = async (session: any, _state: any) => {
   try {
-    // Create or update user in database
-    const user = await prisma.user.upsert({
-      where: { auth0Id: session.user.sub },
-      update: {
-        name: session.user.name,
-        picture: session.user.picture,
-      },
-      create: {
-        auth0Id: session.user.sub,
-        email: session.user.email,
-        name: session.user.name,
-        picture: session.user.picture,
-      },
-    })
+    // Persist the user only when a database connection is configured.
+    // This keeps login working even when DB env vars are missing in preview/production.
+    if (process.env.DATABASE_URL) {
+      const { prisma } = await import('../../../lib/db')
 
-    session.user.dbId = user.id
+      const user = await prisma.user.upsert({
+        where: { auth0Id: session.user.sub },
+        update: {
+          name: session.user.name,
+          picture: session.user.picture,
+        },
+        create: {
+          auth0Id: session.user.sub,
+          email: session.user.email,
+          name: session.user.name,
+          picture: session.user.picture,
+        },
+      })
+
+      session.user.dbId = user.id
+    }
   } catch (error) {
     console.error('Error in afterCallback:', error)
   }
