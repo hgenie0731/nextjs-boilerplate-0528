@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import Image from 'next/image'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 
@@ -67,10 +68,12 @@ export default function Dashboard() {
           <CardContent className="space-y-4">
             {user.picture && (
               <div className="flex justify-center">
-                <img
+                <Image
                   src={user.picture}
-                  alt={user.name}
-                  className="w-24 h-24 rounded-full"
+                  alt={user.name || 'User profile'}
+                  width={96}
+                  height={96}
+                  className="rounded-full"
                 />
               </div>
             )}

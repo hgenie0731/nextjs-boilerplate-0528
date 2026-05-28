@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 
@@ -31,9 +32,9 @@ export default function Home() {
           <p className="text-muted-foreground mb-6">
             Sign in to your account using Google
           </p>
-          <a href="/api/auth/login">
+          <Link href="/api/auth/login">
             <Button className="w-full">Sign in with Google</Button>
-          </a>
+          </Link>
         </CardContent>
       </Card>
     </div>
